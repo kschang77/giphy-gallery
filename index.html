@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Giphy Gallery</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Giphy Gallery</h1>
+
+    <!-- Rendered buttons will get dumped here  -->
+    <div id="buttons-view"></div>
+
+    <form id="giphy-form">
+      <label for="giphy-input">Add a giphy</label>
+      <input type="text" id="giphy-input"><br>
+
+      <!-- Button triggers new giphy to be added -->
+      <input id="add-giphy" type="submit" value="Add a giphy">
+    </form>
+
+    <!-- giphys will get dumped Dere -->
+    <div id="giphys-view"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      // Initial array of giphys
+      var giphys = ["Dog", "Cat", "Horse", "Bear"];
+
+      // displaygiphyInfo function re-renders the HTML to display the appropriate content
+      function displaygiphyInfo() {
+        $("#giphys-view").empty();
+        var giphy = $(this).attr("data-name");
+        
+        var queryURL = "https://api.giphy.com/v1/gifs/search?api_key=5bkP1yl7VJUFC3gD7intiAxoZ65gHizh&q=" + giphy + "&limit=10&offset=0&rating=G&lang=en";
+
+        // Creates AJAX call for the specific giphy button being clicked
+        $.ajax({
+          url: queryURL,
+          method: "GET"
+        }).then(function(response) {
+          var p = $("<p>")
+          res = response.data;
+          for (var i= 0; i<=9 ; i++) {
+            console.log(res[i])
+            var imgEl = $("<img>")
+            // var imgDiv = $("<div>").addClass("animal-item")
+            imgEl.attr("src",res[i].images.fixed_height_still.url)
+            imgEl.attr("data-still",res[i].images.fixed_height_still.url)
+            imgEl.attr("data-animate",res[i].images.fixed_height.url)
+            imgEl.attr("data-state","still")
+            imgEl.addClass("gif")
+            // console.log(imgEl)
+            // imgDiv.append(p)
+            // imgDiv.append(imgEl)
+            // $("#giphys-view").append(imgDiv)
+            $("#giphys-view").append(imgEl)
+          }
+        });
+
+      }
+
+      // Function for displaying giphy data
+      function renderButtons() {
+
+        // Deletes the giphys prior to adding new giphys
+        // (this is necessary otherwise you will have repeat buttons)
+        $("#buttons-view").empty();
+        // Loops through the array of giphys
+        for (var i = 0; i < giphys.length; i++) {
+
+          // Then dynamicaly generates buttons for each giphy in the array
+          // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+          var a = $("<button>");
+          // Adds a class of giphy to our button
+          a.addClass("giphy");
+          // Added a data-attribute
+          a.attr("data-name", giphys[i]);
+          // Provided the initial button text
+          a.text(giphys[i]);
+          // Added the button to the buttons-view div
+          $("#buttons-view").append(a);
+        }
+      }
+
+
+   
+      // This function handles events where the add giphy button is clicked
+      $("#add-giphy").on("click", function(event) {
+        event.preventDefault();
+        // This line of code will grab the input from the textbox
+        var giphy = $("#giphy-input").val().trim();
+
+        // The giphy from the textbox is then added to our array
+        giphys.push(giphy);
+
+        // Calling renderButtons which handles the processing of our giphy array
+        renderButtons();
+      });
+
+      // Adding click event listeners to all elements with a class of "giphy"
+      $("#buttons-view").on("click", ".giphy", displaygiphyInfo);
+
+    $(document).on("click", ".gif", function(event) {
+      event.preventDefault();
+    //   console.log("GIF clicked")
+      var state = $(this).attr("data-state");
+      if (state === "still") {
+        $(this).attr("src",$(this).attr("data-animate"));
+        $(this).attr("data-state","animate");
+      };
+      if (state === "animate") {
+        $(this).attr("src",$(this).attr("data-still"));
+        $(this).attr("data-state","still");
+      };
+    });
+
+
+
+   
+
+
+      // Calling the renderButtons function to display the intial buttons
+      renderButtons();
+    </script>
+  </div>
+</body>
+
+</html>
